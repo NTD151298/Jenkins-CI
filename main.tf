@@ -8,6 +8,12 @@ resource "aws_instance" "main" {
   ami           = "ami-0df7a207adb9748c7"    # AMI ID của Ubuntu
   instance_type = "t2.micro"                 # Instance type của tôi
   key_name      = aws_key_pair.fast.key_name # Key pair của tôi
+  ebs_block_device {
+  device_name           = "/dev/xvdb"
+  volume_type           = "gp3"    # GP3
+  volume_size           = 125
+  delete_on_termination = true
+  }
   tags = {
     Name = "CICD"
   }
