@@ -14,9 +14,7 @@ resource "null_resource" "playbook_exec" {
     key = uuid()
   }
   provisioner "local-exec" {
-    command = <<EOF
-      ansible-playbook ${var.ansible_command} -i ${var.ansible_wsl_host_path}
-      EOF
+    command = "tar -czvf Data/Data.tar.gz -C Data . && ansible-playbook ${var.ansible_command} -i ${var.ansible_wsl_host_path}"
   }
   depends_on = [aws_instance.main, local_file.ansible_inventory]
 }

@@ -1,0 +1,19 @@
+version: "3"
+
+services:
+  jenkins:
+    build:
+      context: /home/ubuntu  # Directory where the Dockerfile is located
+      dockerfile: Dockerfile  # Dockerfile name (optional if it is named 'Dockerfile')
+    image: duongtn1512/jenkins_docker:v4  # Name and tag of the image
+    container_name: jenkins
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /usr/bin/docker:/usr/bin/docker
+
+volumes:
+  jenkins_home:

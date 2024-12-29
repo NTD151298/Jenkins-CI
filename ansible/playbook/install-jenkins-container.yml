@@ -4,65 +4,34 @@
   gather_facts: true
   become: true
   tasks:
+
+    # Login vào tài khoản docker của ta
+    #- name: Login to private Docker registry
+    #  ansible.builtin.docker_login:
+    #    registry_url: https://hub.docker.com/r/duongtn1512
+    #    username: duongnt1512
+    #    password: 
+
+    # Tải các file lên
+    - name: Copy a file to target host
+      copy:
+        src: /home/duongnt01/Personal-project-Devops/Jenkins-CI/Data/Data.tar.gz
+        dest: /home/ubuntu
+    # Unzip the tar files
+    - name: Unziping App.tar.gz ...
+      shell: tar -xzvf /home/ubuntu/Data.tar.gz -C /home/ubuntu
     # Cài đặt docker engine, cấu hình và cấp quyền chạy docker
     - name: Install Container Engine
       shell: |
-        sudo apt-get update
-        sudo apt-get install -y ca-certificates curl gnupg lsb-release
-        curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-        echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-
-        sudo apt-get install docker.io docker-compose -y
-        systemctl enable docker.service
-        systemctl start docker.service
-
-        cat <<EOF | sudo tee /etc/docker/daemon.json
-        {
-          "exec-opts": ["native.cgroupdriver=systemd"],
-          "log-driver": "json-file",
-          "log-opts": {
-            "max-size": "100m"
-          },
-          "storage-driver": "overlay2"
-        }
-        EOF
-        sudo systemctl enable docker
-        sudo systemctl daemon-reload
-        sudo systemctl restart docker
-        sudo chmod 777 /var/run/docker.sock
-
-    # Tạo docker compose file sẽ deploy jenkins container
-    - name: Create Docker Compose file
-      shell: |
-        echo '
-        version: "3"
-
-        services:
-          jenkins:
-            image: duongtn1512/jenkins_docker:v1
-            container_name: jenkins
-            ports:
-              - "8080:8080"
-              - "50000:50000"
-
-            volumes:
-              - jenkins_home:/var/jenkins_home
-              - /var/run/docker.sock:/var/run/docker.sock
-              - /usr/bin/docker:/usr/bin/docker
-
-        volumes:
-          jenkins_home:
-        ' > /home/ubuntu/compose.yaml
-
-    # Chạy jenkins container bằng cái file docker compoes được viết trước đó
+        bash /home/ubuntu/install-docker.sh
+    # Chạy jenkins container bằng cái file docker compoes được tải lên
     - name: Run jenkins container
       shell: |
         docker-compose -f /home/ubuntu/compose.yaml up -d
-
-    # Ngủ khoảng 60s
+    # Ngủ khoảng 10s
     - name: Wait for jenkins container run up
       shell: |
-        sleep 15
+        sleep 10
 
     # Lấy ra mật khẩu cảu jenkins container
     - name: Get Jenkins Password
